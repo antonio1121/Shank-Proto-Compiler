@@ -1,0 +1,38 @@
+public class token {
+
+    public enum type {
+        NUMBER,
+        PLUS,
+        MINUS,
+        TIMES,
+        DIVIDE,
+        LPAR,
+        RPAR,
+        EOL
+    }
+
+    private type type ;
+    private String value ;
+
+    public token(type type , String value) {
+
+        this.value = value ;
+        this.type = type ;
+    }
+    public token (type type) {
+
+        this.type = type ;
+    }
+// getters are used here to edit tokens once they are created in the lexer method
+    public token.type getType() {
+        return type;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String toString() {
+        return type + "(" + value + ")" ;
+    }
+}
