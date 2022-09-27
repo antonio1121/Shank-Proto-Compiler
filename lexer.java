@@ -1,42 +1,58 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 
 
+@SuppressWarnings("StringConcatenationInLoop")
 public class lexer {
-// list to store all the tokens in
+    // list to store all the tokens in
     List<token> tokenlist = new ArrayList<>() ;
-// buffers used to retain our tokens before being outputted
-    char[] charbuff ;
+    // buffers used to retain our tokens before being outputted
+    char[] charBuff;
     String sbuff = "" ;
-    // StringBuilder replaceStringBuff = new StringBuilder() ;
+    String wordBuff = "" ;
     String replaceStringBuff ;
-// test value for illegal decimal
+    // test value for illegal decimal
     int illegalDecimal = 0 ;
+    // HashMap used to store the different types of reserved words
+// define, integer, real, begin, end, variables, constants NOT semicolon colon equal comma
+    static HashMap<String,token.type> reservedWords = new HashMap<>();
+
     public List<token> lex(String line) throws Exception {
 // converts input lines into char array for analysis
-        charbuff = line.toCharArray();
-        charbuff = Arrays.copyOf(charbuff, charbuff.length + 1) ;
-        charbuff[charbuff.length-1] = 'E' ;
-// marks the end of each line with "E"
-        for (int i = 0 ; i != charbuff.length ; i++ ) {
+        charBuff = line.toCharArray();
+        charBuff = Arrays.copyOf(charBuff, charBuff.length + 1) ;
+        charBuff[charBuff.length-1] = '\n' ;
+// Data initialized for hashMap
+        reservedWords.put("define", token.type.define);
+        reservedWords.put("integer", token.type.integer);
+        reservedWords.put("real", token.type.real);
+        reservedWords.put("begin", token.type.begin);
+        reservedWords.put("end", token.type.end);
+        reservedWords.put("variables", token.type.variables);
+        reservedWords.put("constants", token.type.constants);
 
-            if (charbuff[i] == '0' || charbuff[i] == '1' || charbuff[i] == '2' || charbuff[i] == '3' || charbuff[i] == '4' || charbuff[i] == '5' || charbuff[i] == '6' || charbuff[i] == '7' || charbuff[i] == '8' || charbuff[i] == '9' /*|| charbuff[i] == '-' || charbuff[i] == '+' */|| charbuff[i] == '.') {
+// marks the end of each line with "\n"
+        for (int i = 0; i != charBuff.length ; i++ ) {
+
+            if (charBuff[i] == '0' || charBuff[i] == '1' || charBuff[i] == '2' || charBuff[i] == '3' || charBuff[i] == '4' || charBuff[i] == '5' || charBuff[i] == '6' || charBuff[i] == '7' || charBuff[i] == '8' || charBuff[i] == '9' /*|| charbuff[i] == '-' || charbuff[i] == '+' */|| charBuff[i] == '.') {
 
                 if (illegalDecimal == 2) {
                     System.out.println(tokenlist);
                     throw new Exception("Illegal Line. More than one '.' in a token");
                 }
 
-                if (charbuff[i] == '.') {
+                if (charBuff[i] == '.') {
                     illegalDecimal++ ;
                 }
 // Counters count the amount of illegal character build up in a token
-                sbuff += charbuff[i];
+                sbuff += charBuff[i];
 // Resets counter upon a white space
                 try {
-                    if (charbuff[i + 1] == ' ') {
+                    if (charBuff[i + 1] == ' ') {
                         sbuff = sbuff.replaceAll("\\s", "");
                         tokenlist.add(new token(token.type.NUMBER, sbuff));
                         sbuff = "";
@@ -44,35 +60,59 @@ public class lexer {
                     }
                 } catch(ArrayIndexOutOfBoundsException ignored) {}
 // Exception is caught here because we do not edit the array out of bounds ; instead we just want to check the next character if it exists or not.
-            } else if (charbuff[i] == '+') {
+            } else if (charBuff[i] == '+') {
                 tokenlist.add(new token(token.type.PLUS));
 
-            } else if (charbuff[i] == '-') {
+            } else if (charBuff[i] == '-') {
 
                 tokenlist.add(new token(token.type.MINUS));
 
-            } else if (charbuff[i] == '*') {
+            } else if (charBuff[i] == '*') {
                 tokenlist.add(new token(token.type.TIMES));
 
-            } else if (charbuff[i] == '/') {
+            } else if (charBuff[i] == '/') {
                 tokenlist.add(new token(token.type.DIVIDE));
 
-            } else if (charbuff[i] == '(') {
-                tokenlist.add(new token(token.type.LPAR));
+            } else if (charBuff[i] == '(') {
+                // Looks for the comment tag (parenthesis and asterisk) to be ignored by the lexer.
+                try {
+                    if(charBuff[i+1] == '*') {
 
-            } else if (charbuff[i] == ')') {
+                    } else {tokenlist.add(new token(token.type.LPAR)); }
+
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
+
+            } else if (charBuff[i] == ')') {
                 tokenlist.add(new token(token.type.RPAR));
+                // semicolon colon equal comma
+            } else if (charBuff[i] == ';') {
+                tokenlist.add(new token(token.type.semicolon));
+
+            } else if (charBuff[i] == ':') {
+                tokenlist.add(new token(token.type.colon));
+
+            } else if (charBuff[i] == '=') {
+                tokenlist.add(new token(token.type.equal));
+
+            } else if (charBuff[i] == ',') {
+                tokenlist.add(new token(token.type.comma));
+
+            } else if (charBuff[i] == '{') {
+                tokenlist.add(new token(token.type.LBR));
+
+            } else if (charBuff[i] == '}') {
+                tokenlist.add(new token(token.type.RBR));
 
             }
 // All the operators are added here
-            else if (charbuff[i] == ' ') {
+            else if (charBuff[i] == ' ') {
 
-                sbuff += charbuff[i];
+                sbuff += charBuff[i];
                 illegalDecimal = 0 ;
 
-            } else if ( i == charbuff.length - 1) {
+            } else if ( i == charBuff.length - 1) {
 
-                if (sbuff.isEmpty()==false) {
+                if (!sbuff.isEmpty()) {
                     sbuff = sbuff.replaceAll("\\s", "");
                     tokenlist.add(new token(token.type.NUMBER, sbuff));
                 }
@@ -81,19 +121,35 @@ public class lexer {
                 sbuff = sbuff.replaceAll("\\s", "");
 
 
+            } else {
+                wordBuff += charBuff[i] ;
+
+                try {
+                    String futureWordBuff = String.valueOf(charBuff[i+1]);
+                    // Looks in the hashmap if the word buffer has something equal to the reserved words in shank. If it does, it adds the token.
+                    if (charBuff[i + 1] == ' ' || !(Pattern.matches("[a-zA-Z]",futureWordBuff))) {
+                        if(reservedWords.containsKey(wordBuff)) {
+                            tokenlist.add(new token(reservedWords.get(wordBuff)));
+                        } else {
+                            wordBuff = wordBuff.replaceAll("\\s", "");
+                            tokenlist.add(new token(token.type.identifier, wordBuff));
+                        }
+                        wordBuff = "";
+                    }
+                } catch(ArrayIndexOutOfBoundsException ignored) {} // The exception is caught here because we only use it to traverse the elements of the array and not edit them
             }
         } for (int i = 0 ; i != tokenlist.size(); i++) {
             try {
                 // Checks after outputting all the tokens that the plus are minuses are correctly labeled as such and not numbers, and removes null numbers
-               // System.out.println(tokenlist.get(i));
+                // System.out.println(tokenlist.get(i));
 
                 if(tokenlist.get(i).getType().equals((token.type.MINUS))) {
                     if(tokenlist.get(i-1).getType().equals((token.type.MINUS))) {
                         if (tokenlist.get(i - 2).getType().equals((token.type.MINUS))) {
-                                throw new Exception("Illegal Line. Too many minuses.");
-                          }
+                            throw new Exception("Illegal Line. Too many minuses.");
                         }
                     }
+                }
                 if(tokenlist.get(i).getType().equals((token.type.PLUS))) {
                     if(tokenlist.get(i-1).getType().equals((token.type.PLUS))) {
                         if (tokenlist.get(i - 2).getType().equals((token.type.PLUS))) {
@@ -102,23 +158,23 @@ public class lexer {
                     }
                 }
                 if(tokenlist.get(i-1).getType().equals((token.type.MINUS))) {
-                        if(tokenlist.get(i-2).getType().equals((token.type.MINUS))) {
-                            if(tokenlist.get(i).getType().equals(token.type.NUMBER)) {
-                                replaceStringBuff = tokenlist.get(i).getValue() ;
-                                replaceStringBuff = "-" + replaceStringBuff ;
-                                tokenlist.remove(i);
-                                tokenlist.add(i, new token(token.type.NUMBER, replaceStringBuff));
-                                tokenlist.remove(i-1);
+                    if(tokenlist.get(i-2).getType().equals((token.type.MINUS))) {
+                        if(tokenlist.get(i).getType().equals(token.type.NUMBER)) {
+                            replaceStringBuff = tokenlist.get(i).getValue() ;
+                            replaceStringBuff = "-" + replaceStringBuff ;
+                            tokenlist.remove(i);
+                            tokenlist.add(i, new token(token.type.NUMBER, replaceStringBuff));
+                            tokenlist.remove(i-1);
 
-                            }
                         }
-                    } if(tokenlist.get(i-1).getType().equals((token.type.PLUS))) {
-                        if (tokenlist.get(i - 2).getType().equals((token.type.PLUS)) && tokenlist.get(i-3).getType().equals(token.type.NUMBER)) {
-                            if (tokenlist.get(i).getType().equals(token.type.NUMBER)) {
+                    }
+                } if(tokenlist.get(i-1).getType().equals((token.type.PLUS))) {
+                    if (tokenlist.get(i - 2).getType().equals((token.type.PLUS)) && tokenlist.get(i-3).getType().equals(token.type.NUMBER)) {
+                        if (tokenlist.get(i).getType().equals(token.type.NUMBER)) {
                             tokenlist.remove(i - 1);
                         }
                     }
-                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && tokenlist.get(i).getValue() == "") {
+                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && tokenlist.get(i).getValue().equals("")) {
                     tokenlist.remove(i);
                 }
 

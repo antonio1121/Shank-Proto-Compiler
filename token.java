@@ -8,7 +8,21 @@ public class token {
         DIVIDE,
         LPAR,
         RPAR,
-        EOL
+        LBR,
+        RBR,
+        EOL,
+        identifier,
+        define,
+        integer,
+        real,
+        begin,
+        end,
+        semicolon,
+        colon,
+        equal,
+        comma,
+        variables,
+        constants
     }
 
     private type type ;
@@ -23,7 +37,7 @@ public class token {
 
         this.type = type ;
     }
-// getters are used here to edit tokens once they are created in the lexer method
+    // getters are used here to edit tokens once they are created in the lexer method
     public token.type getType() {
         return type;
     }

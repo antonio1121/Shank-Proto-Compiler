@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class shank {
@@ -16,28 +15,29 @@ public class shank {
 
         Path filePath = Paths.get(args[0]);
 
-        List<token> tokenReturnList = new ArrayList<>() ;
+        List<token> tokenReturnList;
 
         try {
 // creates a List of lines of the file given, then is run through the lexer method for lexical analysis using a loop.
             List<String> lines = Files.readAllLines(filePath);
 
-                lexer lexing  = new lexer();
+            lexer lexing  = new lexer();
 
-                for(String line: lines) {
+            for(String line: lines) {
 
-                    lexing.lex(line);
-                }
-                tokenReturnList = lexing.tokenlist ;
+                lexing.lex(line);
+            }
+            tokenReturnList = lexing.tokenlist ;
             System.out.println(tokenReturnList);
 // creates a new parser.
             parser parsing = new parser(tokenReturnList);
-            System.out.println(parsing.parse());
+            System.out.println(parsing.functionDefinition());
+
 
 
 
 // checks if the filename given is correct.
-            } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.out.printf("The file could not be found.%n" + e);
         }
     }
