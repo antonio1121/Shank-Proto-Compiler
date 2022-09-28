@@ -28,10 +28,13 @@ public class shank {
                 lexing.lex(line);
             }
             tokenReturnList = lexing.tokenlist ;
-            System.out.println(tokenReturnList);
+          //  System.out.println(tokenReturnList);
 // creates a new parser.
             parser parsing = new parser(tokenReturnList);
-            System.out.println(parsing.functionDefinition());
+
+          //  System.out.println(parsing.parse().toString());
+
+            System.out.println(parsing.functionDefinition().toString());
 
 
 

@@ -4,9 +4,9 @@ import java.util.List;
 
 public class parser {
 
-    private List<token> tokenlist;
+    private final List<token> tokenlist;
     private token tokenTemp ;
-    private mathOpNode node;
+    private node node;
 
     public parser(List<token> tokenlist) {
         this.tokenlist = tokenlist ;
@@ -16,47 +16,40 @@ public class parser {
     public mathOpNode parse() throws IOException {
 
         matchAndRemove(token.type.EOL);
-        expression();
-        return this.node;
+        return expression();
 
     }
     public mathOpNode expression() throws IOException {
 
         // EXPRESSION = TERM { (plus or minus) TERM}
         // Looks for what type of token it is to addition or subtraction.
+        node = term();
+
         if (matchAndRemove(token.type.PLUS)) {
 
-            return new mathOpNode(term(),term(),mathOpNode.Op.ADD);
+            return new mathOpNode(node,term(),mathOpNode.Op.ADD);
 
         } else if (matchAndRemove(token.type.MINUS)) {
 
-            return new mathOpNode(term(),term(), mathOpNode.Op.SUBTRACT);
+            return new mathOpNode(node,term(), mathOpNode.Op.SUBTRACT);
 
-        } else {
-            term();
-            //   throw new IOException("Cannot create mathOpNode correctly from bad input (method expression() ).");
-        }
-
-        return null;
+        } else {throw new IOException("Cannot create mathOpNode correctly from bad input (method expression() ).");}
     }
 
     public node term() throws IOException {
         // TERM = FACTOR { (times or divide) FACTOR}
         // Looks for what type of token it is to division or multiplication.
+        node = factor();
         if (matchAndRemove(token.type.TIMES)) {
 
-            return new mathOpNode(factor(),factor(),mathOpNode.Op.MULTIPLY) ;
+            return new mathOpNode(node,factor(),mathOpNode.Op.MULTIPLY) ;
 
         } else if (matchAndRemove(token.type.DIVIDE)) {
 
-            return new mathOpNode(factor(),factor(),mathOpNode.Op.DIVIDE) ;
+            return new mathOpNode(node,factor(),mathOpNode.Op.DIVIDE) ;
 
-        } else {
-            factor();
-            // throw new IOException("Cannot create mathOpNode correctly from bad input (method term() ).");
-        }
+        } else {throw new IOException("Cannot create mathOpNode correctly from bad input (method term() ).");}
 
-        return null;
     }
 
     public floatNode factor() throws IOException {
@@ -69,8 +62,7 @@ public class parser {
 
             node = expression();
             matchAndRemove(token.type.RPAR);
-            // return (floatNode) node;
-            return null ;
+            return (floatNode) node;
         } else {
 
             throw new IOException("Cannot create floatNode correctly from bad input (method factor() ).");
@@ -89,7 +81,6 @@ public class parser {
     }
 // New declarations for the buffers of the FunctionDefinition function.
     String identifier = null;
-    float floats = 0;
     ArrayList<variableNode> variables = new ArrayList<>() ;
     boolean variableFlag = false ;
 // returns a functionASTnode by looking for the define keyword, then goes through the list of tokens to make sure
@@ -100,6 +91,7 @@ public class parser {
         String functionName = null;
         variableNode.dataType dataTemp = null ;
         boolean parameterFlag = false ;
+        ArrayList<statementNode> statements = new ArrayList<>();
 
         if(matchAndRemove(token.type.define)) {
             if(matchAndRemove(token.type.identifier)) {
@@ -127,14 +119,13 @@ public class parser {
                 } if (matchAndRemove(token.type.variables)) {
                     processVariables();
                 }
-
+            statements = processBody();
             } else {throw new Exception("Function declared wrong."); }
-            processBody();
 
-        } if(variableFlag && parameterFlag == true){ return new functionASTnode(functionName,parameter,variables);}
-        else if(variableFlag == true && parameterFlag == false){ return new functionASTnode(functionName,null,variables);}
-        else if(variableFlag == false && parameterFlag == true) { return new functionASTnode(functionName,parameter,null);}
-        else if(variableFlag && parameterFlag == false) { return new functionASTnode(functionName,null,null);}
+        } if(variableFlag == true && parameterFlag == true){ return new functionASTnode(functionName,parameter,variables,statements);}
+        else if(variableFlag == true && parameterFlag == false){ return new functionASTnode(functionName,null,variables,statements);}
+        else if(variableFlag == false && parameterFlag == true) { return new functionASTnode(functionName,parameter,null,statements);}
+        else if(variableFlag == false && parameterFlag == false) { return new functionASTnode(functionName,null,null,statements);}
         else {throw new Exception("Function declared wrong.");}
     }
 // Looks for EOLs, then finds the name and makes a new variableNode marked as a constant.
@@ -145,10 +136,10 @@ public class parser {
             identifier = tokenTemp.getValue();
             if(matchAndRemove(token.type.equal)) {
                 if(matchAndRemove(token.type.NUMBER)) {
-                    floats = Float.parseFloat(tokenTemp.getValue());
+                    variables.add(new variableNode(identifier,new floatNode(Float.parseFloat(tokenTemp.getValue())), variableNode.dataType.REAL,true));
+                    variableFlag = true ;
                 } else {throw new Exception("Constants declared wrong."); }
-            } variableFlag = true ;
-            variables.add(new variableNode(identifier,floats, variableNode.dataType.REAL,true));
+            }
         } matchAndRemove(token.type.EOL);
 
     }
@@ -160,25 +151,63 @@ public class parser {
             if(matchAndRemove(token.type.colon)) {
                 if(matchAndRemove(token.type.integer)) {
                     variables.add(new variableNode(identifier, variableNode.dataType.INTEGER,false));
-                    variableFlag = true ;
+                    variableFlag = true ;  // todo fix... somehow to accept multiple variables
                 } else if (matchAndRemove(token.type.real)) {
                     variables.add(new variableNode(identifier, variableNode.dataType.REAL,false));
                     variableFlag = true ;
                 }
 
-            } else {throw new Exception("Variables declared wrong."); }
+            }  matchAndRemove(token.type.comma);
         }
         matchAndRemove(token.type.EOL);
     }
-// Processes the body. Yet to be finished as per the assignment.
-    public void processBody() {
-
+// Processes the body, calls the statements function to process statements.
+    public ArrayList<statementNode> processBody() throws Exception {
+        ArrayList<statementNode> statements ;
         matchAndRemove(token.type.begin);
         matchAndRemove(token.type.EOL);
+        statements = statements();
         matchAndRemove(token.type.end);
         matchAndRemove(token.type.EOL);
+        return statements;
     }
-}
+// The peak method to see future tokens.
+    public boolean peak(token.type type) {
 
+        return tokenlist.get(1).getType() == type;
+    }
+// Checks for an identifier token, assignment token, expression token, and an EOL to assign a variable or else it returns null if done incorrectly.
+    public node assignment() throws Exception {
+        matchAndRemove(token.type.EOL);
+        if(matchAndRemove(token.type.identifier) && !peak(token.type.assign)) {
+            identifier = tokenTemp.getValue();
+            return new variableReferenceNode(identifier);
+        }
+            else if(matchAndRemove(token.type.assign)) {
+                matchAndRemove(token.type.EOL);
+                if(matchAndRemove(token.type.NUMBER)) {
+                    return new assignmentNode(new variableReferenceNode(identifier), new mathOpNode(new floatNode(Float.parseFloat(tokenTemp.getValue())),null,null));
+                }
+               // return new assignmentNode(new variableReferenceNode(identifier),expression());
+            }
+        return null; // todo fix so that expression recursion works
+        }
+
+// Calls the statement function to process statements until it returns null and adds them to a list.
+    public ArrayList<statementNode> statements() throws Exception {
+        ArrayList<statementNode> statements = new ArrayList<>();
+        while (statement()!=null) {
+            statements.add((statementNode)statement());
+        }
+        return statements ;
+
+    }
+// Statement function returns assignment as a statement.
+    public node statement() throws Exception {
+
+        return assignment();
+    }
+
+}
 
 

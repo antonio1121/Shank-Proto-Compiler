@@ -1,9 +1,9 @@
 public class variableNode extends node {
 
-    private String identifier;
-    private boolean isConstant;
-    private float floater;
-    private dataType dataType;
+    private final String identifier;
+    private final boolean isConstant;
+    private floatNode floater;
+    private final dataType dataType;
 
     public enum dataType {
         INTEGER, REAL
@@ -14,7 +14,7 @@ public class variableNode extends node {
         this.dataType = dataType ;
         this.isConstant = isConstant ;
     }
-    public variableNode(String identifier, float floater, dataType dataType, boolean isConstant) {
+    public variableNode(String identifier, floatNode floater, dataType dataType, boolean isConstant) {
 
         this.identifier = identifier;
         this.floater = floater ;

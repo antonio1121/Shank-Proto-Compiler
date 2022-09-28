@@ -22,10 +22,11 @@ public class token {
         equal,
         comma,
         variables,
-        constants
+        constants,
+        assign
     }
 
-    private type type ;
+    private final type type ;
     private String value ;
 
     public token(type type , String value) {

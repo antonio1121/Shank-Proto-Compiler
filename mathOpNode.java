@@ -3,8 +3,9 @@ public class mathOpNode extends node {
         ADD, SUBTRACT, MULTIPLY, DIVIDE
     }
 
-    private Op Op ;
-    private node left, right ;
+    private final Op Op ;
+    private final node left;
+    private final node right ;
 
     public mathOpNode(node left, node right, Op Op) {
 

@@ -76,15 +76,21 @@ public class lexer {
             } else if (charBuff[i] == '(') {
                 // Looks for the comment tag (parenthesis and asterisk) to be ignored by the lexer.
                 try {
+                    int commentIndex ;
                     if(charBuff[i+1] == '*') {
+                        String comment = new String(charBuff);
+                        commentIndex = comment.indexOf(')');
+                            if(comment.charAt(commentIndex - 1) == '*') {
+                                i = commentIndex ;
+                            }
 
                     } else {tokenlist.add(new token(token.type.LPAR)); }
 
-                } catch(ArrayIndexOutOfBoundsException ignored) {}
+                } catch(ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ignored) {}
 
             } else if (charBuff[i] == ')') {
                 tokenlist.add(new token(token.type.RPAR));
-                // semicolon colon equal comma
+
             } else if (charBuff[i] == ';') {
                 tokenlist.add(new token(token.type.semicolon));
 
@@ -92,7 +98,15 @@ public class lexer {
                 tokenlist.add(new token(token.type.colon));
 
             } else if (charBuff[i] == '=') {
-                tokenlist.add(new token(token.type.equal));
+                // Looks for the assignment statement by checking for a previous colon.
+                try {
+                    if (charBuff[i - 1] == ':') {
+                        tokenlist.remove(tokenlist.size()-1);
+                        tokenlist.add(new token(token.type.assign));
+                    } else {
+                        tokenlist.add(new token(token.type.equal));
+                    }
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
 
             } else if (charBuff[i] == ',') {
                 tokenlist.add(new token(token.type.comma));
@@ -141,7 +155,6 @@ public class lexer {
         } for (int i = 0 ; i != tokenlist.size(); i++) {
             try {
                 // Checks after outputting all the tokens that the plus are minuses are correctly labeled as such and not numbers, and removes null numbers
-                // System.out.println(tokenlist.get(i));
 
                 if(tokenlist.get(i).getType().equals((token.type.MINUS))) {
                     if(tokenlist.get(i-1).getType().equals((token.type.MINUS))) {

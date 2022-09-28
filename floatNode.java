@@ -1,6 +1,6 @@
 public class floatNode extends node {
 
-    private float floatNumber ;
+    private final float floatNumber ;
 
     public floatNode(float floatNumber) {
         this.floatNumber = floatNumber;
