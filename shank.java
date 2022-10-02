@@ -28,13 +28,14 @@ public class shank {
                 lexing.lex(line);
             }
             tokenReturnList = lexing.tokenlist ;
-          //  System.out.println(tokenReturnList);
+            System.out.println("BUGS: Sometimes expressions don't parse if there are no spaces in between numbers and operands.");
+          System.out.println(tokenReturnList);
 // creates a new parser.
             parser parsing = new parser(tokenReturnList);
 
-          //  System.out.println(parsing.parse().toString());
+         // System.out.println(parsing.parse().toString());
 
-            System.out.println(parsing.functionDefinition().toString());
+           System.out.println(parsing.functionDefinition().toString());
 
 
 

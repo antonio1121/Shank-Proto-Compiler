@@ -20,6 +20,7 @@ public class mathOpNode extends node {
     public node getRight() {
         return right ;
     }
+    public Op getOp() {return Op ;}
 
     @Override
     public String toString() {

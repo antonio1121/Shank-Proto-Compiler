@@ -1,9 +1,9 @@
 public class assignmentNode extends statementNode {
 
     private final variableReferenceNode vrn ;
-    private final mathOpNode expression ;
+    private final node expression ;
 
-    public assignmentNode(variableReferenceNode vrn, mathOpNode expression) {
+    public assignmentNode(variableReferenceNode vrn, node expression) {
 
         this.vrn = vrn ;
         this.expression = expression ;

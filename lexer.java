@@ -75,7 +75,7 @@ public class lexer {
 
             } else if (charBuff[i] == '(') {
                 // Looks for the comment tag (parenthesis and asterisk) to be ignored by the lexer.
-                try {
+               try {
                     int commentIndex ;
                     if(charBuff[i+1] == '*') {
                         String comment = new String(charBuff);
@@ -187,7 +187,7 @@ public class lexer {
                             tokenlist.remove(i - 1);
                         }
                     }
-                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && tokenlist.get(i).getValue().equals("")) {
+                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && tokenlist.get(i).getValue().equals(null)) {
                     tokenlist.remove(i);
                 }
 
