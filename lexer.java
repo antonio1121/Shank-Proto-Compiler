@@ -34,6 +34,16 @@ public class lexer {
         reservedWords.put("end", token.type.end);
         reservedWords.put("variables", token.type.variables);
         reservedWords.put("constants", token.type.constants);
+        reservedWords.put("if", token.type.iff);
+        reservedWords.put("then", token.type.then);
+        reservedWords.put("else", token.type.elsee);
+        reservedWords.put("elsif", token.type.elsif);
+        reservedWords.put("for", token.type.forr);
+        reservedWords.put("from", token.type.from);
+        reservedWords.put("to", token.type.to);
+        reservedWords.put("while", token.type.whilee);
+        reservedWords.put("repeat", token.type.repeat);
+        reservedWords.put("until", token.type.until);
 
 // marks the end of each line with "\n"
         for (int i = 0; i != charBuff.length ; i++ ) {
@@ -98,12 +108,21 @@ public class lexer {
                 tokenlist.add(new token(token.type.colon));
 
             } else if (charBuff[i] == '=') {
-                // Looks for the assignment statement by checking for a previous colon.
+                // Looks for the assignment statement by checking for a previous colon, and for boolean comparators.
                 try {
                     if (charBuff[i - 1] == ':') {
                         tokenlist.remove(tokenlist.size()-1);
                         tokenlist.add(new token(token.type.assign));
-                    } else {
+
+                    } else if(charBuff[i-1] == '>') {
+                        tokenlist.remove(tokenlist.size()-1);
+                        tokenlist.add(new token(token.type.gequal));
+
+                    } else if (charBuff[i-1] == '<') {
+                        tokenlist.remove(tokenlist.size()-1);
+                        tokenlist.add(new token(token.type.lequal));
+                    }
+                    else {
                         tokenlist.add(new token(token.type.equal));
                     }
                 } catch(ArrayIndexOutOfBoundsException ignored) {}
@@ -116,6 +135,23 @@ public class lexer {
 
             } else if (charBuff[i] == '}') {
                 tokenlist.add(new token(token.type.RBR));
+
+            } else if (charBuff[i] == '%') {
+                tokenlist.add(new token(token.type.MODULO));
+// The other boolean comparators are located here.
+            } else if (charBuff[i] == '>') {
+                try {
+                    if(charBuff[i-1] == '<') {
+                        tokenlist.remove(tokenlist.size()-1);
+                        tokenlist.add(new token(token.type.notequal));
+
+                    } else {
+                        tokenlist.add(new token(token.type.greater));
+                    }
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
+
+            } else if (charBuff[i] == '<') {
+                tokenlist.add(new token(token.type.less));
 
             }
 // All the operators are added here
@@ -187,7 +223,7 @@ public class lexer {
                             tokenlist.remove(i - 1);
                         }
                     }
-                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && tokenlist.get(i).getValue().equals(null)) {
+                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && (tokenlist.get(i).getValue().equals(null) || tokenlist.get(i).getValue().equals(""))) {
                     tokenlist.remove(i);
                 }
 

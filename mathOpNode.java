@@ -1,6 +1,6 @@
 public class mathOpNode extends node {
     enum Op {
-        ADD, SUBTRACT, MULTIPLY, DIVIDE
+        ADD, SUBTRACT, MULTIPLY, DIVIDE, MOD
     }
 
     private final Op Op ;
@@ -24,6 +24,6 @@ public class mathOpNode extends node {
 
     @Override
     public String toString() {
-        return "MathNode(" + Op + "," + left + "," + right + ")" ;
+        return "mathNode(" + Op + "," + left + "," + right + ")" ;
     }
 }
