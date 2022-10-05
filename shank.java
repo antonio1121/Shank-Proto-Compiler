@@ -29,13 +29,17 @@ public class shank {
             }
             tokenReturnList = lexing.tokenlist ;
             System.out.println("BUGS: Sometimes expressions don't parse if there are no spaces in between numbers and operands.");
+            System.out.println("Factor method throws exception even though it works correctly ?!?! ");
+            System.out.println();
           System.out.println(tokenReturnList);
+            System.out.println();
 // creates a new parser.
             parser parsing = new parser(tokenReturnList);
 
+
          // System.out.println(parsing.parse().toString());
 
-           System.out.println(parsing.functionDefinition().toString());
+           System.out.println(parsing.repeatExpression());
 
 
 

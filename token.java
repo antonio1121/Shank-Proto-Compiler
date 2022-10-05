@@ -6,6 +6,7 @@ public class token {
         MINUS,
         TIMES,
         DIVIDE,
+        MODULO,
         LPAR,
         RPAR,
         LBR,
@@ -23,7 +24,23 @@ public class token {
         comma,
         variables,
         constants,
-        assign
+        assign,
+        iff,
+        then,
+        elsee,
+        elsif,
+        forr,
+        from,
+        to,
+        whilee,
+        repeat,
+        until,
+        less,
+        greater,
+        lequal,
+        gequal,
+        notequal
+
     }
 
     private final type type ;
