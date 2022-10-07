@@ -48,7 +48,10 @@ public class lexer {
 // marks the end of each line with "\n"
         for (int i = 0; i != charBuff.length ; i++ ) {
 
-            if (charBuff[i] == '0' || charBuff[i] == '1' || charBuff[i] == '2' || charBuff[i] == '3' || charBuff[i] == '4' || charBuff[i] == '5' || charBuff[i] == '6' || charBuff[i] == '7' || charBuff[i] == '8' || charBuff[i] == '9' /*|| charbuff[i] == '-' || charbuff[i] == '+' */|| charBuff[i] == '.') {
+            if (charBuff[i] == '0' || charBuff[i] == '1' || charBuff[i] == '2' || charBuff[i] == '3' ||
+                    charBuff[i] == '4' || charBuff[i] == '5' || charBuff[i] == '6' || charBuff[i] == '7' ||
+                    charBuff[i] == '8' || charBuff[i] == '9' /*|| charbuff[i] == '-' || charbuff[i] == '+' */||
+                    charBuff[i] == '.') {
 
                 if (illegalDecimal == 2) {
                     System.out.println(tokenlist);
@@ -173,7 +176,7 @@ public class lexer {
 
             } else {
                 wordBuff += charBuff[i] ;
-
+//todo fix...maybe... so that you don't need spaces in between numbers and operands (probably word buffer(??))
                 try {
                     String futureWordBuff = String.valueOf(charBuff[i+1]);
                     // Looks in the hashmap if the word buffer has something equal to the reserved words in shank. If it does, it adds the token.
@@ -224,6 +227,8 @@ public class lexer {
                         }
                     }
                 } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && (tokenlist.get(i).getValue().equals(null) || tokenlist.get(i).getValue().equals(""))) {
+                    tokenlist.remove(i);
+                } if(tokenlist.get(i).getType().equals(token.type.identifier) && (tokenlist.get(i).getValue().equals(""))) {
                     tokenlist.remove(i);
                 }
 

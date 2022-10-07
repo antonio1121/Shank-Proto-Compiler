@@ -72,8 +72,8 @@ public class parser {
 
             return new variableReferenceNode(tokenTemp.getValue());
         } else {
-// todo fix parenthesis not parsing correctly
-            throw new IOException("Cannot create node correctly from bad input.");
+// todo fix parenthesis not parsing correctly, and throwing exception even though it works perfectly fine.
+            throw new IOException("Cannot create node correctly from bad input: " + node + ", " + tokenTemp);
         }
     }
 
@@ -107,7 +107,7 @@ public class parser {
 
         if(matchAndRemove(token.type.define)) {
             if(matchAndRemove(token.type.identifier)) {
-                functionName = tokenTemp.getValue() ;
+                functionName = tokenTemp.getValue();
 
                 if(matchAndRemove(token.type.LPAR)) {
                     while (!matchAndRemove(token.type.RPAR)) {
@@ -133,7 +133,7 @@ public class parser {
                     processVariables();
                 }
             statements = processBody();
-            } else {throw new Exception("Function declared wrong."); }
+            } else {throw new Exception("Function declared wrong (name)."); }
 
         } if(variableFlag && parameterFlag){ return new functionASTNode(functionName,parameter,variables,statements);}
         else if(variableFlag && !parameterFlag){ return new functionASTNode(functionName,null,variables,statements);}
@@ -164,30 +164,32 @@ public class parser {
             if(matchAndRemove(token.type.colon)) {
                 if(matchAndRemove(token.type.integer)) {
                     variables.add(new variableNode(identifier, variableNode.dataType.INTEGER,false));
-                    variableFlag = true ;  // todo fix... somehow to accept multiple variables
                 } else if (matchAndRemove(token.type.real)) {
                     variables.add(new variableNode(identifier, variableNode.dataType.REAL,false));
-                    variableFlag = true ;
                 }
+            } else if(matchAndRemove(token.type.comma)) {
+                List<token.type> tokenTypeList = tokenlist.stream().map(token::getType).collect(Collectors.toList());
+                variableNode.dataType varType = null;
+
+                if(tokenTypeList.contains(token.type.integer) && (tokenTypeList.get(tokenTypeList.indexOf(token.type.integer)+1)).equals(token.type.EOL)) {
+                    varType = variableNode.dataType.INTEGER ;
+                } else if(tokenTypeList.contains(token.type.real) && (tokenTypeList.get(tokenTypeList.indexOf(token.type.real)+1)).equals(token.type.EOL)) {
+                    varType = variableNode.dataType.REAL ;
+                }
+                variables.add(new variableNode(identifier, varType,false));
+                do {
+                    matchAndRemove(token.type.identifier);
+                    identifier = tokenTemp.getValue();
+                    variables.add(new variableNode(identifier,varType,false));
+                    matchAndRemove(token.type.comma);
+                } while(!matchAndRemove(token.type.colon));
 
             }
-        } if (matchAndRemove(token.type.comma)) {
-            List<token.type> tokenTypeList = tokenlist.stream().map(token::getType).collect(Collectors.toList());
-
-            do {
-                if(matchAndRemove(token.type.identifier)) {
-                    identifier = tokenTemp.getValue();
-                    if(tokenTypeList.contains(token.type.real)) {
-                        variables.add(new variableNode(identifier, variableNode.dataType.REAL,false));
-                    } else if(tokenTypeList.contains(token.type.integer)) {
-                        variables.add(new variableNode(identifier, variableNode.dataType.INTEGER,false));
-                    }
-                    matchAndRemove(token.type.comma);
-                    // todo ended here look for future token of integer or real. Statements will not work within functions until finished.
-                }
-            } while(!matchAndRemove(token.type.colon));
         }
+        matchAndRemove(token.type.integer);
+        matchAndRemove(token.type.real);
         matchAndRemove(token.type.EOL);
+        variableFlag = true ;
     }
 // Processes the body, calls the statements function to process statements.
     public ArrayList<statementNode> processBody() throws IOException {
