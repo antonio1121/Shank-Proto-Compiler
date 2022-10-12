@@ -36,10 +36,12 @@ public class shank {
 // creates a new parser.
             parser parsing = new parser(tokenReturnList);
 
-         //System.out.println(parsing.parse().toString());
+         // System.out.println(parsing.parse().toString());
 
-           System.out.println(parsing.functionDefinition());
+          System.out.println(parsing.functionDefinition());
 
+           // interpreter interpret = new interpreter();
+          // System.out.println(interpret.resolve(parsing.expression()));
 // checks if the filename given is correct.
         } catch (FileNotFoundException e) {
             System.out.printf("The file could not be found.%n" + e);

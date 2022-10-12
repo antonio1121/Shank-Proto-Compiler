@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class functionASTNode extends node {
+public class functionASTNode extends callableNode {
 
     private final String identifier ;
     private final ArrayList<variableNode> parameters ;
@@ -9,6 +9,7 @@ public class functionASTNode extends node {
 
 // Different constructor overloads depending on what type of function is returned by the FunctionDefinition function.
     public functionASTNode(String identifier, ArrayList<variableNode> parameters, ArrayList<variableNode> variables, ArrayList<statementNode> statements) {
+        super(identifier,variables);
 
         this.identifier = identifier;
         this.parameters = parameters;

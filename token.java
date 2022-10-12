@@ -39,6 +39,7 @@ public class token {
         greater,
         lequal,
         gequal,
+        varr,
         notequal
 
     }

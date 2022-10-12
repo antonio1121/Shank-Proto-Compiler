@@ -44,6 +44,7 @@ public class lexer {
         reservedWords.put("while", token.type.whilee);
         reservedWords.put("repeat", token.type.repeat);
         reservedWords.put("until", token.type.until);
+        reservedWords.put("var", token.type.varr);
 
 // marks the end of each line with "\n"
         for (int i = 0; i != charBuff.length ; i++ ) {
@@ -193,7 +194,8 @@ public class lexer {
             }
         } for (int i = 0 ; i != tokenlist.size(); i++) {
             try {
-                // Checks after outputting all the tokens that the plus are minuses are correctly labeled as such and not numbers, and removes null numbers
+                // Checks after outputting all the tokens that the plus are minuses are correctly labeled as such and not numbers,
+                // and removes null numbers and identifiers.
 
                 if(tokenlist.get(i).getType().equals((token.type.MINUS))) {
                     if(tokenlist.get(i-1).getType().equals((token.type.MINUS))) {
@@ -221,7 +223,7 @@ public class lexer {
                         }
                     }
                 } if(tokenlist.get(i-1).getType().equals((token.type.PLUS))) {
-                    if (tokenlist.get(i - 2).getType().equals((token.type.PLUS)) && tokenlist.get(i-3).getType().equals(token.type.NUMBER)) {
+                    if ((tokenlist.get(i - 2).getType().equals(token.type.PLUS) || tokenlist.get(i - 2).getType().equals(token.type.MINUS) || tokenlist.get(i - 2).getType().equals(token.type.DIVIDE) || tokenlist.get(i - 2).getType().equals(token.type.MODULO) || tokenlist.get(i - 2).getType().equals(token.type.TIMES)) && tokenlist.get(i-3).getType().equals(token.type.NUMBER)) {
                         if (tokenlist.get(i).getType().equals(token.type.NUMBER)) {
                             tokenlist.remove(i - 1);
                         }
@@ -234,6 +236,25 @@ public class lexer {
 
             } catch(IndexOutOfBoundsException ignored) {}
         } // Again the exception is caught here because we only use it to traverse the elements of the array and not edit them
+
+        // Does one final check to correct negative numbers that are standalone.
+
+        for(int i = 0; i != tokenlist.size(); i++) {
+
+            if(tokenlist.get(i).getType().equals(token.type.NUMBER)) {
+                try {
+                    if(tokenlist.get(i-1).getType().equals(token.type.MINUS)) {
+                        if(!tokenlist.get(i-2).getType().equals(token.type.NUMBER)) {
+                             replaceStringBuff = tokenlist.get(i).getValue();
+                             replaceStringBuff = "-" + replaceStringBuff ;
+                             tokenlist.remove(i);
+                             tokenlist.add(i, new token(token.type.NUMBER, replaceStringBuff));
+                             tokenlist.remove(i-1);
+                        }
+                    }
+                } catch(IndexOutOfBoundsException ignored) {}
+            }
+        }
 
         return tokenlist ;
     }

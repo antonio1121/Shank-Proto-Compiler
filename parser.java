@@ -72,7 +72,7 @@ public class parser {
 
             return new variableReferenceNode(tokenTemp.getValue());
         } else {
-// todo fix parenthesis not parsing correctly, and throwing exception even though it works perfectly fine.
+// todo fix parenthesis not parsing correctly, and throwing exception at every number even though it works perfectly fine.
             throw new IOException("Cannot create node correctly from bad input: " + node + ", " + tokenTemp);
         }
     }
@@ -192,7 +192,7 @@ public class parser {
         variableFlag = true ;
     }
 // Processes the body, calls the statements function to process statements.
-    public ArrayList<statementNode> processBody() throws IOException {
+    public ArrayList<statementNode> processBody() throws Exception {
         ArrayList<statementNode> statements ;
         matchAndRemove(token.type.begin);
         matchAndRemove(token.type.EOL);
@@ -227,15 +227,17 @@ public class parser {
         }
 
 // Calls the statement function to process statements until it returns null and adds them to a list.
-    public ArrayList<statementNode> statements() throws IOException {
+    public ArrayList<statementNode> statements() throws Exception {
         ArrayList<statementNode> statements = new ArrayList<>();
-        while (statement()!=null) {
+        while (statement()!=null || functionCall()!=null) {
             statements.add((statementNode)statement());
+            statements.add(functionCall());
+
         }
         return statements ;
     }
 // Statement function returns assignment as a statement.
-    public node statement() throws IOException {
+    public node statement() throws Exception {
         return assignment();
     }
 // Creates a boolean expression node if the tokens (left expression, comparison, right expression) are given correctly.
@@ -274,7 +276,7 @@ public class parser {
         return new booleanExpressionNode(leftnode,rightnode,comparer);
     }
     // Creates a while expression node if boolean expression is found and statements.
-    public whileNode whileExpression() throws IOException {
+    public whileNode whileExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
 
@@ -287,7 +289,7 @@ public class parser {
         return new whileNode(bool,statementList);
     }
     // Creates a repeat expression node if boolean expression is found and statements.
-    public repeatNode repeatExpression() throws IOException {
+    public repeatNode repeatExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
 
@@ -300,7 +302,7 @@ public class parser {
         return new repeatNode(bool,statementList);
     }
     // Creates a for expression node if there's a variable, start, end, and list of statements.
-    public forNode forExpression() throws IOException {
+    public forNode forExpression() throws Exception {
         List<statementNode> statementList = null;
         node startNode = null ;
         node endNode = null ;
@@ -320,7 +322,7 @@ public class parser {
         return new forNode(var,startNode,endNode,statementList);
     }
     // Creates an if expression node if a boolean expression, statements, and possible other if nodes are found.
-    public ifNode ifExpression() throws IOException {
+    public ifNode ifExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
         ifNode ifNested = null ;
@@ -344,7 +346,29 @@ public class parser {
             }
             return null ;
     }
+// Looks for function calls and makes a new functionCallNode if user input is correct.
+    public functionCallNode functionCall() throws Exception {
+        String identifier = null;
+        List<parameterNode> parameters = null;
 
+        if(matchAndRemove(token.type.identifier)) {
+            identifier = tokenTemp.getValue();
+            do {
+                if(matchAndRemove(token.type.varr)) {
+                    matchAndRemove(token.type.identifier);
+                    parameters.add(new parameterNode(tokenTemp.getValue(),true));
+
+                } else if(matchAndRemove(token.type.identifier)) {
+                    parameters.add(new parameterNode(tokenTemp.getValue(),false));
+
+                } else if(matchAndRemove(token.type.NUMBER)) {
+                    parameters.add(new parameterNode(new floatNode(Float.parseFloat(tokenTemp.getValue())),false));
+
+                }
+            } while(!matchAndRemove(token.type.comma));
+        }
+        return new functionCallNode(identifier,parameters);
+    }
 }
 
 
