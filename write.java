@@ -1,21 +1,15 @@
 import java.util.List;
-import java.util.Scanner;
 
-public class write extends  builtInFunctionNode {
+public class write extends builtInFunctionNode {
 
-
-    protected write(boolean isVariadic) {
-        super(true);
+    public write() {
+        super("write",null,true);
     }
 
     @Override
-    List<parameterNode> execute(List<interpreterDataType> list) {
-
-        List<parameterNode> paramList = null ;
-      //  for(interpreterDataType e: )
-        //todo finish this
-
-        return paramList ;
-
+    public void execute(List<interpreterDataType> list) {
+      for(interpreterDataType elements: list) {
+          System.out.println(elements);
+      }
     }
 }

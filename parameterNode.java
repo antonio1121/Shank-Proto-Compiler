@@ -5,7 +5,7 @@ public class parameterNode extends node {
     private boolean isVar ;
 
     public parameterNode(node parameter,boolean isVar) {
-
+// todo is parameter supposed to be of type node?
         this.parameter = parameter ;
         this.isVar = isVar ;
     }

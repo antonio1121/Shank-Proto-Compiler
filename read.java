@@ -3,17 +3,16 @@ import java.util.Scanner;
 
 public class read extends builtInFunctionNode {
 
-    protected read(boolean isVariadic) {
-        super(true);
+    public read() {
+        super("read",null,true);
     }
 
     @Override
-    List<parameterNode> execute(List<interpreterDataType> list) {
+    public void execute(List<interpreterDataType> list) {
 
-        List<parameterNode> paramList = null ;
         Scanner scan = new Scanner(System.in);
-    // todo finish this
-        return paramList ;
-
+        while(scan.hasNext()) {
+            list.add(new floatDataType(scan.nextFloat()));
+        }
     }
 }

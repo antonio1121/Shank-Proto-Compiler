@@ -11,6 +11,14 @@ public class functionCallNode extends statementNode {
         this.args = args ;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public List<parameterNode> getArgs() {
+        return args;
+    }
+
     public String toString() {
 
         return identifier + "(" + args + ")" ;

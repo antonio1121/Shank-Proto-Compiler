@@ -73,6 +73,10 @@ public class parser {
             return new variableReferenceNode(tokenTemp.getValue());
         } else {
 // todo fix parenthesis not parsing correctly, and throwing exception at every number even though it works perfectly fine.
+            /* nothing has changed about the expression code, but now it infinitely throws the exception crashing the IDE.
+            // if node and tokenTemp are "equal" in the thrown exception, then it means it has parsed correctly
+             and there is no reason it should be doing this.
+             */
             throw new IOException("Cannot create node correctly from bad input: " + node + ", " + tokenTemp);
         }
     }
@@ -134,7 +138,6 @@ public class parser {
                 }
             statements = processBody();
             } else {throw new Exception("Function declared wrong (name)."); }
-
         } if(variableFlag && parameterFlag){ return new functionASTNode(functionName,parameter,variables,statements);}
         else if(variableFlag && !parameterFlag){ return new functionASTNode(functionName,null,variables,statements);}
         else if(!variableFlag && parameterFlag) { return new functionASTNode(functionName,parameter,null,statements);}
@@ -321,11 +324,11 @@ public class parser {
         }
         return new forNode(var,startNode,endNode,statementList);
     }
-    // Creates an if expression node if a boolean expression, statements, and possible other if nodes are found.
+    // Creates an if expression node is a boolean expression, statements, and possible other if nodes are found.
     public ifNode ifExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
-        ifNode ifNested = null ;
+        ifNode ifNested = null;
         elseNode elsee = null ;
 // Perhaps could it be better to make a separate elsif method for recursion ?
         matchAndRemove(token.type.iff);
@@ -347,10 +350,9 @@ public class parser {
             return null ;
     }
 // Looks for function calls and makes a new functionCallNode if user input is correct.
-    public functionCallNode functionCall() throws Exception {
+    public functionCallNode functionCall() {
         String identifier = null;
-        List<parameterNode> parameters = null;
-
+        List<parameterNode> parameters = new ArrayList<>();
         if(matchAndRemove(token.type.identifier)) {
             identifier = tokenTemp.getValue();
             do {

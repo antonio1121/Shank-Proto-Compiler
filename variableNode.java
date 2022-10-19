@@ -22,6 +22,10 @@ public class variableNode extends node {
         this.isConstant = isConstant ;
     }
 
+    public floatNode getFloater() {
+        return floater;
+    }
+
     @Override
     public String toString() {
         return "VariableNode( " + identifier + " = " + floater + " ,isConstant: " + isConstant + ")" ;

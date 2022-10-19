@@ -3,18 +3,15 @@ import java.util.Random;
 
 public class getRandom extends builtInFunctionNode {
 
-
-    protected getRandom(boolean isVariadic) {
-        super(isVariadic);
+    public getRandom() {
+        super("getRandom",null,false);
     }
 
     @Override
-    List<parameterNode> execute(List<interpreterDataType> list) {
+    public void execute(List<interpreterDataType> list) {
 
-        List<parameterNode> paramList = null ;
         Random rand = new Random();
-        paramList.add(new parameterNode(new integerNode(rand.nextInt()),true));
-        return paramList ;
+        list.set(0,new intDataType(rand.nextInt()));
 
     }
 }

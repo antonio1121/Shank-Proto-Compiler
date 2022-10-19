@@ -1,6 +1,14 @@
 public class floatDataType extends interpreterDataType {
 
-private float number ;
+    private float number ;
+
+    public floatDataType(float floatNumber) {
+        floatNumber = number ;
+    }
+
+    public float getNumber() {
+        return number;
+    }
 
     @Override
     public String ToString() {

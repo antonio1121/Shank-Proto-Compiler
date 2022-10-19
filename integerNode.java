@@ -1,6 +1,6 @@
 public class integerNode extends node {
 
-    private final int intNumber ;
+    private int intNumber ;
 
     public integerNode(int intNumber) {
         this.intNumber = intNumber;

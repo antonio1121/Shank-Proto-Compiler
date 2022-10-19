@@ -2,18 +2,14 @@ import java.util.List;
 
 public class realToInteger extends builtInFunctionNode {
 
-    protected realToInteger(boolean isVariadic) {
-        super(false);
+    public realToInteger() {
+        super("realToInteger",null,false);
     }
-
+// todo is this correct constructor call?
     @Override
-    List<parameterNode> execute(List<interpreterDataType> list) throws Exception {
-        List<parameterNode> paramList = null;
+    public void execute(List<interpreterDataType> list) throws Exception {
         if(list.get(0) instanceof floatDataType) {
-            paramList.add(new parameterNode(new floatNode(Float.parseFloat(list.get(0).toString())),false));
-            paramList.add(new parameterNode(new integerNode(Integer.parseInt(list.get(0).toString())),true));
+           list.set(1,new floatDataType(((floatDataType) list.get(0)).getNumber()));
         } else {throw new Exception("Wrong parameters.");}
-        return paramList ;
-
     }
 }

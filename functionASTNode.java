@@ -17,6 +17,23 @@ public class functionASTNode extends callableNode {
         this.statements = statements ;
     }
 
+    public ArrayList<variableNode> getParameters() {
+        return parameters;
+    }
+
+    public ArrayList<variableNode> getVariables() {
+        return variables;
+    }
+
+    public ArrayList<statementNode> getStatements() {
+        return statements;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    // var = not constant, not var = constant.
     @Override
     public String toString() {
 
