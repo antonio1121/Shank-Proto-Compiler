@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class repeatNode extends node {
+public class repeatNode extends statementNode {
 
     private booleanExpressionNode bool ;
     private List<statementNode> statements ;
@@ -10,6 +10,14 @@ public class repeatNode extends node {
         this.bool = bool ;
         this.statements = statements ;
 
+    }
+
+    public booleanExpressionNode getBool() {
+        return bool;
+    }
+
+    public List<statementNode> getStatements() {
+        return statements;
     }
 
     @Override

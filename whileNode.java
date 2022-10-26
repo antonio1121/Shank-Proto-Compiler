@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class whileNode extends node {
+public class whileNode extends statementNode {
 
     private booleanExpressionNode bool ;
     private List<statementNode> statements ;
@@ -10,6 +10,14 @@ public class whileNode extends node {
         this.bool = bool ;
         this.statements = statements ;
 
+    }
+
+    public booleanExpressionNode getBool() {
+        return bool;
+    }
+
+    public List<statementNode> getStatements() {
+        return statements;
     }
 
     @Override

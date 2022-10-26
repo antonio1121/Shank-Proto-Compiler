@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class forNode extends node {
+public class forNode extends statementNode {
 
     private variableReferenceNode var ;
     private node startNode ;
@@ -14,6 +14,22 @@ public class forNode extends node {
         this.endNode = endNode ;
         this.statements = statements ;
 
+    }
+
+    public List<statementNode> getStatements() {
+        return statements;
+    }
+
+    public node getEndNode() {
+        return endNode;
+    }
+
+    public node getStartNode() {
+        return startNode;
+    }
+
+    public variableReferenceNode getVar() {
+        return var;
     }
 
     @Override

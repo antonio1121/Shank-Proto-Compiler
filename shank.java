@@ -27,7 +27,7 @@ public class shank {
             lines = Files.readAllLines(filePath);
         } catch (FileNotFoundException e) {
             System.out.printf("The file could not be found.%n" + e);
-        }
+        } // checks if the filename given is correct.
 
         lexer lexing = new lexer();
 
@@ -47,7 +47,7 @@ public class shank {
         functionList.put("getRandom",new getRandom());
         functionList.put("integerToReal",new integerToReal());
         functionList.put("read",new read());
-        functionList.put("realToInteger", new realToInteger());
+        functionList.put("realToInteger", realToInteger.getInstance());
         functionList.put("squareRoot", new squareRoot());
         functionList.put("write", new write());
 
@@ -58,11 +58,13 @@ public class shank {
         if(!functionList.containsKey("start")) {
             throw new Exception("You must have a start function to run.");
         }
-        //  if(interpreter.interpretFunction();)
 
-        // interpreter interpret = new interpreter();
+        interpreter interpret = new interpreter();
 
-// checks if the filename given is correct.
+        interpreter.interpretFunction((functionASTNode) functionList.get("start"),null);
+
+
+
 
     }
 }

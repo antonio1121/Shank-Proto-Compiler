@@ -61,7 +61,11 @@ public class parser {
         // FACTOR = {-} number or lparen EXPRESSION rparen or variable
         if(matchAndRemove(token.type.NUMBER)) {
 
-            return new floatNode(Float.parseFloat(tokenTemp.getValue()));
+            if(tokenTemp.getValue().contains(".")) {
+                return new floatNode(Float.parseFloat(tokenTemp.getValue()));
+            } else {
+                return new integerNode(Integer.parseInt(tokenTemp.getValue()));
+            }
 
         } else if(matchAndRemove(token.type.LPAR)) {
 
@@ -70,7 +74,7 @@ public class parser {
             return node;
         } else if(matchAndRemove(token.type.identifier)) {
 
-            return new variableReferenceNode(tokenTemp.getValue());
+            return new variableReferenceNode(tokenTemp.getValue(),false);
         } else {
 // todo fix parenthesis not parsing correctly, and throwing exception at every number even though it works perfectly fine.
             /* nothing has changed about the expression code, but now it infinitely throws the exception crashing the IDE.
@@ -216,13 +220,13 @@ public class parser {
         matchAndRemove(token.type.EOL);
         if(matchAndRemove(token.type.identifier) && !peak(token.type.assign)) {
             identifier = tokenTemp.getValue();
-            return new variableReferenceNode(identifier);
+            return new variableReferenceNode(identifier,false);
         }
             else if(matchAndRemove(token.type.assign)) {
-                    return new assignmentNode(new variableReferenceNode(identifier), expression());
+                    return new assignmentNode(new variableReferenceNode(identifier,false), expression());
                 }
             try {
-                return new assignmentNode(new variableReferenceNode(identifier),parse());
+                return new assignmentNode(new variableReferenceNode(identifier,false),parse());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -232,9 +236,13 @@ public class parser {
 // Calls the statement function to process statements until it returns null and adds them to a list.
     public ArrayList<statementNode> statements() throws Exception {
         ArrayList<statementNode> statements = new ArrayList<>();
-        while (statement()!=null || functionCall()!=null) {
+        while (statement()!=null||functionCall()!=null||ifExpression()!=null||whileExpression()!=null||repeatExpression()!=null||forExpression()!=null) {
             statements.add((statementNode)statement());
             statements.add(functionCall());
+            statements.add(ifExpression());
+            statements.add(whileExpression());
+            statements.add(repeatExpression());
+            statements.add(forExpression());
 
         }
         return statements ;
@@ -246,37 +254,37 @@ public class parser {
 // Creates a boolean expression node if the tokens (left expression, comparison, right expression) are given correctly.
 
     public booleanExpressionNode booleanExpression() throws IOException {
-        node rightnode;
+        node rightNode;
         booleanExpressionNode.compare comparer;
-        node leftnode = expression();
+        node leftNode = expression();
 
         if(matchAndRemove(token.type.less)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.lessThan ;
 
         } else if(matchAndRemove(token.type.equal)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.Equals ;
 
         } else if(matchAndRemove(token.type.greater)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.greater ;
 
         } else if(matchAndRemove(token.type.lequal)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.lEquals ;
 
         } else if(matchAndRemove(token.type.gequal)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.gEquals ;
 
         } else if(matchAndRemove(token.type.notequal)) {
-            rightnode = expression();
+            rightNode = expression();
             comparer = booleanExpressionNode.compare.notEqual ;
             
         } else {throw new IOException("cannot make boolean statement.");}
         
-        return new booleanExpressionNode(leftnode,rightnode,comparer);
+        return new booleanExpressionNode(leftNode,rightNode,comparer);
     }
     // Creates a while expression node if boolean expression is found and statements.
     public whileNode whileExpression() throws Exception {
@@ -313,7 +321,7 @@ public class parser {
         // What is meant here by start and end node ?? expression ?
         if(matchAndRemove(token.type.forr)) {
             if(matchAndRemove(token.type.identifier)) {
-                var = new variableReferenceNode(tokenTemp.getValue());
+                var = new variableReferenceNode(tokenTemp.getValue(),true);
                 matchAndRemove(token.type.comma);
                 startNode = expression();
                 matchAndRemove(token.type.comma);
@@ -326,28 +334,36 @@ public class parser {
     }
     // Creates an if expression node is a boolean expression, statements, and possible other if nodes are found.
     public ifNode ifExpression() throws Exception {
-        List<statementNode> statementList;
-        booleanExpressionNode bool;
-        ifNode ifNested = null;
+        List<statementNode> ifStatementList = new ArrayList<>();
+        List<statementNode> elsifStatementList;
+        List<statementNode> elseStatementList;
+        List<ifNode> elseifNode = new ArrayList<>();
+        booleanExpressionNode bool = null ;
+        booleanExpressionNode elsifBool;
         elseNode elsee = null ;
-// Perhaps could it be better to make a separate elsif method for recursion ?
-        matchAndRemove(token.type.iff);
+
+        if(matchAndRemove(token.type.iff)) {
             bool = booleanExpression();
-            matchAndRemove(token.type.EOL);
-            statementList = statements();
-            matchAndRemove(token.type.EOL);
-            if(!(matchAndRemove(token.type.elsif) || matchAndRemove(token.type.elsee))) {
-                return new ifNode(bool,statementList,ifNested,elsee);
-            } else if(matchAndRemove(token.type.elsif)) {
+            if(matchAndRemove(token.type.then)) {
                 matchAndRemove(token.type.EOL);
-                ifNested = ifExpression();
-            } else if (matchAndRemove(token.type.elsee)) {
-                matchAndRemove(token.type.EOL);
-                List<statementNode> elseStatementList = statements();
-                elsee = new elseNode(elseStatementList);
-                return new ifNode(bool,statementList,ifNested,elsee);
+                ifStatementList = statements();
+                while(matchAndRemove(token.type.elsif)) {
+                    elsifBool = booleanExpression();
+                    if(matchAndRemove(token.type.then)) {
+                        matchAndRemove(token.type.EOL);
+                        elsifStatementList = statements();
+                        elseifNode.add(new ifNode(elsifBool,elsifStatementList,null,null));
+                        matchAndRemove(token.type.EOL);
+                    }
+                } if(matchAndRemove(token.type.elsee)) {
+                    matchAndRemove(token.type.EOL);
+                    elseStatementList = statements();
+                    elsee = new elseNode(elseStatementList);
+                }
             }
-            return null ;
+        }
+
+        return new ifNode(bool,ifStatementList,elseifNode,elsee);
     }
 // Looks for function calls and makes a new functionCallNode if user input is correct.
     public functionCallNode functionCall() {
@@ -358,10 +374,10 @@ public class parser {
             do {
                 if(matchAndRemove(token.type.varr)) {
                     matchAndRemove(token.type.identifier);
-                    parameters.add(new parameterNode(tokenTemp.getValue(),true));
+                    parameters.add(new parameterNode(new variableReferenceNode(tokenTemp.getValue(),false),true)); // new variable reference node
 
                 } else if(matchAndRemove(token.type.identifier)) {
-                    parameters.add(new parameterNode(tokenTemp.getValue(),false));
+                    parameters.add(new parameterNode(new variableReferenceNode(tokenTemp.getValue(),false),false));
 
                 } else if(matchAndRemove(token.type.NUMBER)) {
                     parameters.add(new parameterNode(new floatNode(Float.parseFloat(tokenTemp.getValue())),false));

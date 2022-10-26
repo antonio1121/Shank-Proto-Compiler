@@ -9,6 +9,14 @@ public class assignmentNode extends statementNode {
         this.expression = expression ;
     }
 
+    public variableReferenceNode getVrn() {
+        return vrn;
+    }
+
+    public node getExpression() {
+        return expression;
+    }
+
     @Override
     public String toString() {
 

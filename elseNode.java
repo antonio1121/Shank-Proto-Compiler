@@ -8,6 +8,10 @@ public class elseNode extends node {
         this.statementList = statementList ;
     }
 
+    public List<statementNode> getStatementList() {
+        return statementList;
+    }
+
     @Override
     public String toString() {
         return "else{" + statementList + "}" ;

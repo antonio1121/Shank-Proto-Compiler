@@ -1,9 +1,12 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class integerToReal extends builtInFunctionNode {
-
+    private static final ArrayList<variableNode> p = new ArrayList<>();
     public integerToReal() {
-        super("integerToReal",null,false);
+        super("integerToReal",p,false);
+        p.add(new variableNode("someInteger", variableNode.dataType.REAL,true));
+        p.add(new variableNode("someReal", variableNode.dataType.INTEGER,false));
     }
 
     @Override

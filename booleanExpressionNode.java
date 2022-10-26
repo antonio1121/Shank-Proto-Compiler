@@ -23,6 +23,18 @@ public class booleanExpressionNode extends node {
 
     }
 
+    public node getLeftExpression() {
+        return leftExpression;
+    }
+
+    public node getRightExpression() {
+        return rightExpression;
+    }
+
+    public booleanExpressionNode.compare getCompare() {
+        return compare;
+    }
+
     @Override
     public String toString() {
         return "booleanExpression(" + compare + "," + leftExpression + "," + rightExpression + ")" ;
