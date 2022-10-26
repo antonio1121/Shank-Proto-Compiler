@@ -20,7 +20,7 @@ public class interpreter {
             return (((integerNode) node).getIntNumber());
 
         }else if(node instanceof variableReferenceNode) {
-            return Float.parseFloat(String.valueOf(variableList.get(node.toString())));
+            return Float.parseFloat(variableList.get(((variableReferenceNode) node).getName()).toString());
 
         } else if (node instanceof mathOpNode) {
 
@@ -62,6 +62,7 @@ public class interpreter {
             if (statement instanceof functionCallNode) {
                 if(shank.functionList.containsKey(((functionCallNode) statement).getIdentifier())) {
                     List<interpreterDataType> values = new ArrayList<>();
+                    //todo what is values supposed to do? list is updated, but never queried.
                     for(parameterNode item : ((functionCallNode) statement).getArgs()) {
 
                         if(item.getParameter() instanceof integerNode) {

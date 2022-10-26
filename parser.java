@@ -296,7 +296,7 @@ public class parser {
             matchAndRemove(token.type.EOL);
             statementList = statements();
 
-        } else {throw new IOException("cannot make while statement.");}
+        } else {return null;}
         return new whileNode(bool,statementList);
     }
     // Creates a repeat expression node if boolean expression is found and statements.
@@ -309,7 +309,7 @@ public class parser {
             matchAndRemove(token.type.EOL);
             statementList = statements();
 
-        } else {throw new IOException("cannot make repeat statement.");}
+        } else {return null;}
         return new repeatNode(bool,statementList);
     }
     // Creates a for expression node if there's a variable, start, end, and list of statements.
