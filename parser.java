@@ -223,7 +223,7 @@ public class parser {
             return new variableReferenceNode(identifier,false);
         }
             else if(matchAndRemove(token.type.assign)) {
-                    return new assignmentNode(new variableReferenceNode(identifier,false), expression());
+                    return new assignmentNode(new variableReferenceNode(identifier,false), parse());
                 }
             try {
                 return new assignmentNode(new variableReferenceNode(identifier,false),parse());
@@ -256,30 +256,30 @@ public class parser {
     public booleanExpressionNode booleanExpression() throws IOException {
         node rightNode;
         booleanExpressionNode.compare comparer;
-        node leftNode = expression();
+        node leftNode = parse();
 
         if(matchAndRemove(token.type.less)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.lessThan ;
 
         } else if(matchAndRemove(token.type.equal)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.Equals ;
 
         } else if(matchAndRemove(token.type.greater)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.greater ;
 
         } else if(matchAndRemove(token.type.lequal)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.lEquals ;
 
         } else if(matchAndRemove(token.type.gequal)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.gEquals ;
 
         } else if(matchAndRemove(token.type.notequal)) {
-            rightNode = expression();
+            rightNode = parse();
             comparer = booleanExpressionNode.compare.notEqual ;
             
         } else {throw new IOException("cannot make boolean statement.");}
@@ -290,11 +290,11 @@ public class parser {
     public whileNode whileExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
-
+        matchAndRemove(token.type.EOL);
         if(matchAndRemove(token.type.whilee)) {
             bool = booleanExpression();
+            statementList = processBody();
             matchAndRemove(token.type.EOL);
-            statementList = statements();
 
         } else {return null;}
         return new whileNode(bool,statementList);
@@ -303,11 +303,13 @@ public class parser {
     public repeatNode repeatExpression() throws Exception {
         List<statementNode> statementList;
         booleanExpressionNode bool;
-
+        matchAndRemove(token.type.EOL);
         if(matchAndRemove(token.type.repeat)) {
+            statementList = processBody();
+            matchAndRemove(token.type.EOL);
+            matchAndRemove(token.type.until);
             bool = booleanExpression();
             matchAndRemove(token.type.EOL);
-            statementList = statements();
 
         } else {return null;}
         return new repeatNode(bool,statementList);
@@ -322,14 +324,14 @@ public class parser {
         if(matchAndRemove(token.type.forr)) {
             if(matchAndRemove(token.type.identifier)) {
                 var = new variableReferenceNode(tokenTemp.getValue(),true);
-                matchAndRemove(token.type.comma);
-                startNode = expression();
-                matchAndRemove(token.type.comma);
-                endNode = expression();
-                matchAndRemove(token.type.EOL);
-                statementList = statements();
+                matchAndRemove(token.type.from);
+                startNode = parse();
+                matchAndRemove(token.type.to);
+                endNode = parse();
+                statementList = processBody();
             }
         }
+        matchAndRemove(token.type.EOL);
         return new forNode(var,startNode,endNode,statementList);
     }
     // Creates an if expression node is a boolean expression, statements, and possible other if nodes are found.
@@ -345,24 +347,22 @@ public class parser {
         if(matchAndRemove(token.type.iff)) {
             bool = booleanExpression();
             if(matchAndRemove(token.type.then)) {
-                matchAndRemove(token.type.EOL);
-                ifStatementList = statements();
+                ifStatementList = processBody();
                 while(matchAndRemove(token.type.elsif)) {
                     elsifBool = booleanExpression();
                     if(matchAndRemove(token.type.then)) {
-                        matchAndRemove(token.type.EOL);
-                        elsifStatementList = statements();
+                        elsifStatementList = processBody();
                         elseifNode.add(new ifNode(elsifBool,elsifStatementList,null,null));
                         matchAndRemove(token.type.EOL);
                     }
                 } if(matchAndRemove(token.type.elsee)) {
                     matchAndRemove(token.type.EOL);
-                    elseStatementList = statements();
+                    elseStatementList = processBody();
                     elsee = new elseNode(elseStatementList);
                 }
             }
         }
-
+        matchAndRemove(token.type.EOL);
         return new ifNode(bool,ifStatementList,elseifNode,elsee);
     }
 // Looks for function calls and makes a new functionCallNode if user input is correct.
