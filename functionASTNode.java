@@ -7,7 +7,6 @@ public class functionASTNode extends callableNode {
     private final ArrayList<variableNode> variables ;
     private final ArrayList<statementNode> statements ;
 
-// Different constructor overloads depending on what type of function is returned by the FunctionDefinition function.
     public functionASTNode(String identifier, ArrayList<variableNode> parameters, ArrayList<variableNode> variables, ArrayList<statementNode> statements) {
         super(identifier,variables);
 

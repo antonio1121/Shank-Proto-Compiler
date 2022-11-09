@@ -33,6 +33,19 @@ public class parser {
             }
              else if (tokenTemp.getType() == token.type.MINUS) {
                 node = new mathOpNode(node, term(), mathOpNode.Op.SUBTRACT);
+
+            } else if (tokenTemp.getType() == token.type.less) {
+                return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.lessThan);
+            } else if (tokenTemp.getType() == token.type.equal) {
+                 return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.Equals);
+            } else if (tokenTemp.getType() == token.type.greater) {
+                 return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.greater);
+            } else if (tokenTemp.getType() == token.type.lequal) {
+                 return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.lEquals);
+            } else if(tokenTemp.getType() == token.type.gequal) {
+                 return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.gEquals);
+            } else if(tokenTemp.getType() == token.type.notequal) {
+                 return new booleanExpressionNode(node,factor(), booleanExpressionNode.compare.notEqual);
             }
         }
         return node ;
@@ -68,19 +81,26 @@ public class parser {
             }
 
         } else if(matchAndRemove(token.type.LPAR)) {
-
             node = expression();
             matchAndRemove(token.type.RPAR);
             return node;
-        } else if(matchAndRemove(token.type.identifier)) {
 
+        } else if(matchAndRemove(token.type.identifier)) {
             return new variableReferenceNode(tokenTemp.getValue(),false);
+
+        } else if(matchAndRemove(token.type.truee)) {
+            return new boolNode(true);
+
+        } else if(matchAndRemove(token.type.falsee)) {
+            return new boolNode(false);
+
+        } else if(matchAndRemove(token.type.charr)) {
+            return new charNode(tokenTemp.getValue().charAt(0));
+
+        } else if(matchAndRemove(token.type.stringg)) {
+            return new stringNode(tokenTemp.getValue());
+
         } else {
-// todo fix parenthesis not parsing correctly, and throwing exception at every number even though it works perfectly fine.
-            /* nothing has changed about the expression code, but now it infinitely throws the exception crashing the IDE.
-            // if node and tokenTemp are "equal" in the thrown exception, then it means it has parsed correctly
-             and there is no reason it should be doing this.
-             */
             throw new IOException("Cannot create node correctly from bad input: " + node + ", " + tokenTemp);
         }
     }
@@ -208,29 +228,30 @@ public class parser {
         matchAndRemove(token.type.EOL);
         return statements;
     }
-// The peak method to see future tokens.
-    public boolean peak(token.type type) {
+// The peek method to see future tokens.
+    public boolean peek(token.type type,int position) {
         try {
-            return tokenlist.get(1).getType() == type;
+            return tokenlist.get(position).getType() == type;
         } catch (IndexOutOfBoundsException ignored) {}
         return false ;
     }
 // Checks for an identifier token, assignment token, expression token, and an EOL to assign a variable or else it returns null if done incorrectly.
     public node assignment() throws IOException {
+        String identifier;
+        node expression;
         matchAndRemove(token.type.EOL);
-        if(matchAndRemove(token.type.identifier) && !peak(token.type.assign)) {
+        if(peek(token.type.identifier,0)&&peek(token.type.assign,1)) {
+            matchAndRemove(token.type.identifier);
             identifier = tokenTemp.getValue();
-            return new variableReferenceNode(identifier,false);
-        }
-            else if(matchAndRemove(token.type.assign)) {
-                    return new assignmentNode(new variableReferenceNode(identifier,false), parse());
-                }
-            try {
-                return new assignmentNode(new variableReferenceNode(identifier,false),parse());
-            } catch (IOException e) {
-                e.printStackTrace();
+            matchAndRemove(token.type.assign);
+            expression = parse();
+            if(expression instanceof integerNode) {
+                return new assignmentNode(new variableReferenceNode(identifier,true),expression);
+            } else {
+                return new assignmentNode(new variableReferenceNode(identifier,false),expression);
             }
-        return null;
+        }
+        return null ;
         }
 
 // Calls the statement function to process statements until it returns null and adds them to a list.
@@ -295,9 +316,10 @@ public class parser {
             bool = booleanExpression();
             statementList = processBody();
             matchAndRemove(token.type.EOL);
+            return new whileNode(bool,statementList);
+        }
+        return null ;
 
-        } else {return null;}
-        return new whileNode(bool,statementList);
     }
     // Creates a repeat expression node if boolean expression is found and statements.
     public repeatNode repeatExpression() throws Exception {
@@ -310,9 +332,10 @@ public class parser {
             matchAndRemove(token.type.until);
             bool = booleanExpression();
             matchAndRemove(token.type.EOL);
+            return new repeatNode(bool,statementList);
+        }
+        return null ;
 
-        } else {return null;}
-        return new repeatNode(bool,statementList);
     }
     // Creates a for expression node if there's a variable, start, end, and list of statements.
     public forNode forExpression() throws Exception {
@@ -320,7 +343,7 @@ public class parser {
         node startNode = null ;
         node endNode = null ;
         variableReferenceNode var = null ;
-        // What is meant here by start and end node ?? expression ?
+
         if(matchAndRemove(token.type.forr)) {
             if(matchAndRemove(token.type.identifier)) {
                 var = new variableReferenceNode(tokenTemp.getValue(),true);
@@ -330,9 +353,11 @@ public class parser {
                 endNode = parse();
                 statementList = processBody();
             }
+            matchAndRemove(token.type.EOL);
+            return new forNode(var,startNode,endNode,statementList);
         }
-        matchAndRemove(token.type.EOL);
-        return new forNode(var,startNode,endNode,statementList);
+        return null ;
+
     }
     // Creates an if expression node is a boolean expression, statements, and possible other if nodes are found.
     public ifNode ifExpression() throws Exception {
@@ -340,7 +365,7 @@ public class parser {
         List<statementNode> elsifStatementList;
         List<statementNode> elseStatementList;
         List<ifNode> elseifNode = new ArrayList<>();
-        booleanExpressionNode bool = null ;
+        booleanExpressionNode bool;
         booleanExpressionNode elsifBool;
         elseNode elsee = null ;
 
@@ -361,31 +386,35 @@ public class parser {
                     elsee = new elseNode(elseStatementList);
                 }
             }
+            matchAndRemove(token.type.EOL);
+            return new ifNode(bool,ifStatementList,elseifNode,elsee);
         }
-        matchAndRemove(token.type.EOL);
-        return new ifNode(bool,ifStatementList,elseifNode,elsee);
+        return null;
     }
 // Looks for function calls and makes a new functionCallNode if user input is correct.
-    public functionCallNode functionCall() {
-        String identifier = null;
+    public functionCallNode functionCall() throws IOException {
+        String identifier ;
         List<parameterNode> parameters = new ArrayList<>();
-        if(matchAndRemove(token.type.identifier)) {
+
+        if(peek(token.type.identifier,0)&&!peek(token.type.assign,1)) {
+            matchAndRemove(token.type.identifier);
             identifier = tokenTemp.getValue();
             do {
                 if(matchAndRemove(token.type.varr)) {
                     matchAndRemove(token.type.identifier);
-                    parameters.add(new parameterNode(new variableReferenceNode(tokenTemp.getValue(),false),true)); // new variable reference node
+                    parameters.add(new parameterNode(new variableReferenceNode(tokenTemp.getValue(),false),true));
 
                 } else if(matchAndRemove(token.type.identifier)) {
                     parameters.add(new parameterNode(new variableReferenceNode(tokenTemp.getValue(),false),false));
-
-                } else if(matchAndRemove(token.type.NUMBER)) {
-                    parameters.add(new parameterNode(new floatNode(Float.parseFloat(tokenTemp.getValue())),false));
+                    // Is this done right for string, char, and bool function calls??
+                } else if(matchAndRemove(token.type.NUMBER)||matchAndRemove(token.type.stringg)||matchAndRemove(token.type.charr)||matchAndRemove(token.type.truee)||matchAndRemove(token.type.falsee)) {
+                    parameters.add(new parameterNode(factor(),false));
 
                 }
-            } while(!matchAndRemove(token.type.comma));
+            } while(matchAndRemove(token.type.comma));
+            return new functionCallNode(identifier,parameters);
         }
-        return new functionCallNode(identifier,parameters);
+    return null ;
     }
 }
 

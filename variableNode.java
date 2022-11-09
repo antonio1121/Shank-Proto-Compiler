@@ -2,7 +2,7 @@ public class variableNode extends node {
 
     private final String identifier;
     private final boolean isConstant;
-    private floatNode value;
+    private node value;
     private final dataType dataType;
 
     public enum dataType {
@@ -26,7 +26,7 @@ public class variableNode extends node {
         return identifier;
     }
 
-    public floatNode getValue() {
+    public node getValue() {
         return value;
     }
 

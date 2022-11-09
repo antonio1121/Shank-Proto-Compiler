@@ -40,7 +40,15 @@ public class token {
         lequal,
         gequal,
         varr,
-        notequal
+        notequal,
+
+        truee,
+
+        falsee,
+
+        charr,
+
+        stringg
 
     }
 

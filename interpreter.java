@@ -41,6 +41,38 @@ public class interpreter {
         }
         return 0 ;
     }
+    // resolves a String.
+    public static String resolveString(node node) {
+        if(node instanceof stringNode) {
+            return node.toString();
+        } else if(node instanceof mathOpNode) {
+            if(((mathOpNode) node).getLeft() instanceof stringNode && (((mathOpNode) node).getRight() instanceof stringNode)) {
+                return ((mathOpNode) node).getLeft().toString() + ((mathOpNode) node).getRight().toString();
+            } else if(((mathOpNode) node).getLeft() instanceof stringNode && (((mathOpNode) node).getRight() instanceof charNode)) {
+                return ((mathOpNode) node).getLeft().toString() + ((mathOpNode) node).getRight().toString();
+            } else if (((mathOpNode) node).getLeft() instanceof charNode && (((mathOpNode) node).getRight() instanceof charNode)) {
+                return ((mathOpNode) node).getLeft().toString() + ((mathOpNode) node).getRight().toString();
+            }
+        }
+        return null ;
+    }
+    // resolves a boolean statement.
+    public static boolean resolveBoolean(node node) {
+        if(node instanceof boolNode) {
+            return Boolean.parseBoolean(node.toString());
+        } else if(node instanceof booleanExpressionNode) {
+            return processBoolean((booleanExpressionNode) node);
+        }
+        return false ;
+    }
+    // resolves a character.
+    public static char resolveCharacter(node node) {
+        if(node instanceof charNode) {
+            return node.toString().charAt(0);
+        }
+        return '0' ;
+    }
+
 // Interprets a function by checking if it is a BIF or a user defined one, and runs the parameters through it.
     public static void interpretFunction(functionASTNode function, List<interpreterDataType> parameters) throws Exception {
         int i = 0;
@@ -51,7 +83,7 @@ public class interpreter {
         }
 
         for (variableNode variable : function.getVariables()) {
-            variableList.put(variable.getIdentifier(), new floatDataType(variable.getValue().getFloatNumber()));
+            variableList.put(variable.getIdentifier(), new floatDataType(Float.parseFloat(variable.getValue().toString())));
         }
 
         interpretBlock(function.getStatements());
@@ -75,7 +107,7 @@ public class interpreter {
                             values.add(variableList.get(item.toString()));
                         }
                     }
-
+                    System.out.println(values);
                 } else {throw new Exception("Function does not exist.");}
 // Processes assignments,if,while,repeat,and for statements, and if found, and put its on the hash map.
             } else if(statement instanceof assignmentNode) {
@@ -118,6 +150,7 @@ public class interpreter {
                     }
                 } else {throw new Exception("Indexers are not integers.");}
             }
+
         }
 
     }

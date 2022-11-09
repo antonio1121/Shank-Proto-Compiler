@@ -45,6 +45,8 @@ public class lexer {
         reservedWords.put("repeat", token.type.repeat);
         reservedWords.put("until", token.type.until);
         reservedWords.put("var", token.type.varr);
+        reservedWords.put("true", token.type.truee);
+        reservedWords.put("false", token.type.falsee);
 
 // marks the end of each line with "\n"
         for (int i = 0; i != charBuff.length ; i++ ) {
@@ -156,7 +158,27 @@ public class lexer {
 
             } else if (charBuff[i] == '<') {
                 tokenlist.add(new token(token.type.less));
+// We add strings and characters here, checking for correct single characters.
+            } else if (charBuff[i] == '\'' ) {
+                try {
+                    if(charBuff[i+2] == '\'' ) {
+                        tokenlist.add(new token(token.type.charr,String.valueOf(charBuff[i+1])));
+                        i = i + 2;
+                    } else {throw new Exception("Illegal character declaration.");}
+                } catch(ArrayIndexOutOfBoundsException ignored) {}
 
+            } else if (charBuff[i] == '"') {
+                try {
+                    String contents = new String(charBuff);
+                    int firstContentIndex = contents.indexOf('"');
+                    int contentIndex = contents.lastIndexOf('"');
+                    if(contentIndex!=-1 && (firstContentIndex!=contentIndex)) {
+                        contents = contents.replaceAll("\\s","");
+                        contents = contents.substring(1,contents.length()-1);
+                        tokenlist.add(new token(token.type.stringg,contents));
+                        i = contentIndex ;
+                    } else {throw new Exception("Illegal string declaration.");}
+                } catch(ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ignored) {}
             }
 // All the operators are added here
             else if (charBuff[i] == ' ') {
@@ -228,7 +250,7 @@ public class lexer {
                             tokenlist.remove(i - 1);
                         }
                     }
-                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && (tokenlist.get(i).getValue().equals(null) || tokenlist.get(i).getValue().equals(""))) {
+                } if(tokenlist.get(i).getType().equals(token.type.NUMBER) && (tokenlist.get(i).getValue() == null || tokenlist.get(i).getValue().equals(""))) {
                     tokenlist.remove(i);
                 } if(tokenlist.get(i).getType().equals(token.type.identifier) && (tokenlist.get(i).getValue().equals(""))) {
                     tokenlist.remove(i);

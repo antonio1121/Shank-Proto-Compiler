@@ -36,7 +36,7 @@ public class shank {
             lexing.lex(line);
         }
         tokenReturnList = lexing.tokenlist;
-        System.out.println("BUGS: Sometimes expressions don't parse if there are no spaces in between numbers and operands.");
+        System.out.println("BUGS: Sometimes expressions don't parse if there are no spaces in between numbers, operands, and parenthesis.");
         System.out.println("Factor method throws exception even though it works correctly ?!?! ");
         System.out.println();
         System.out.println(tokenReturnList);
@@ -59,9 +59,12 @@ public class shank {
             throw new Exception("You must have a start function to run.");
         }
 
+        semanticAnalysis.checkAssignments(functionList);
         interpreter interpret = new interpreter();
 
+
         interpreter.interpretFunction((functionASTNode) functionList.get("start"),null);
+        System.out.println(interpreter.variableList);
 
 
 
